@@ -46,6 +46,12 @@ int main(int argc, char *argv[]) {
         break;
     }
 
-    freeaddrinfo(serverinfo);
+    freeaddrinfo(connection);
+
+    if (serverinfo == NULL) {
+        fprintf(stderr, "server: failed to bind\n");
+    }
+
+
 }
 
