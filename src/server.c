@@ -1,57 +1,40 @@
-#include <asm-generic/socket.h>
 #include <netdb.h>
-#include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
+#include <stdio.h>
 #include <sys/socket.h>
-#include <unistd.h>
 
 int main(int argc, char *argv[]) {
-    printf("hello server\n");
-    struct addrinfo hint;
+    struct addrinfo host;
     struct addrinfo *connection;
-    struct addrinfo *serverinfo;
-    int status;
-    int port;
-    int sockfd;
+    memset(&host, 0 , sizeof host);
+    host.ai_family = AF_INET;
+    host.ai_socktype = SOCK_STREAM;
+    host.ai_protocol = 0;
+    host.ai_flags = AI_PASSIVE;
 
-    int yes = 1;
+    int status = getaddrinfo(NULL, "8080", &host, &connection);
+    printf("created a connection with status: %d \n", status);
 
-    memset(&hint, 0, sizeof hint);
-    hint.ai_family = AF_UNSPEC;
-    hint.ai_socktype = SOCK_STREAM;
-    hint.ai_flags = AI_PASSIVE; // use the machine IP
+    int sock_conn = socket(connection->ai_family, connection->ai_socktype, connection->ai_protocol);
+    printf("created a socket with status: %d \n", sock_conn);
 
-    if ((status = getaddrinfo(NULL, "3490", &hint, &connection)) != 0) {
-        return 1;
-    }
+    bind(sock_conn, connection->ai_addr, connection->ai_addrlen);
 
-    //bind a server
-    for (serverinfo = connection; serverinfo != NULL; serverinfo = serverinfo->ai_next) {
-        if ((sockfd = socket(serverinfo->ai_family, serverinfo->ai_socktype, serverinfo->ai_protocol)) == -1) {
-            perror("server: socket");
-            continue;
-        }
+    //connect(sock_conn, connection->ai_addr, connection->ai_addrlen);
+    listen(sock_conn, 0);
 
-        if (setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int)) == -1) {
-            perror("setsockopt");
-            exit(1);
-        }
+    int client_conn = accept(sock_conn, 0, 0);
 
-        if (bind(sockfd, serverinfo->ai_addr, serverinfo->ai_addrlen) != 1) {
-            close(sockfd);
-            perror("server:bind");
-            continue;
-        }
-        break;
-    }
+
+    char buffer[256] = {0};
+
+    recv(client_conn, buffer, 256, 0);
+    printf("message received\n");
+
+    printf("message receiver: %s\n", buffer);
+
+    send(client_conn, "Hello back\n", 256, 0);
 
     freeaddrinfo(connection);
-
-    if (serverinfo == NULL) {
-        fprintf(stderr, "server: failed to bind\n");
-    }
-
-
 }
 
