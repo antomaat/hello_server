@@ -2,6 +2,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <sys/socket.h>
+#include <unistd.h>
 
 int main(int argc, char *argv[]) {
     struct addrinfo host;
@@ -23,17 +24,19 @@ int main(int argc, char *argv[]) {
     //connect(sock_conn, connection->ai_addr, connection->ai_addrlen);
     listen(sock_conn, 0);
 
-    int client_conn = accept(sock_conn, 0, 0);
 
+    while(1) {
+        int client_conn = accept(sock_conn, 0, 0);
 
-    char buffer[256] = {0};
+        char buffer[256] = {0};
+        recv(client_conn, buffer, 256, 0);
+        printf("message received\n");
 
-    recv(client_conn, buffer, 256, 0);
-    printf("message received\n");
+        printf("message receiver: %s\n", buffer);
 
-    printf("message receiver: %s\n", buffer);
-
-    send(client_conn, "Hello back\n", 256, 0);
+        send(client_conn, "Hello back\n", 256, 0);
+        close(client_conn);
+    }
 
     freeaddrinfo(connection);
 }
