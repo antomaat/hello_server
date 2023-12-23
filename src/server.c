@@ -1,4 +1,6 @@
+//#include <csignal>
 #include <netdb.h>
+#include <netinet/in.h>
 #include <string.h>
 #include <stdio.h>
 #include <sys/socket.h>
@@ -7,40 +9,36 @@
 int main(int argc, char *argv[]) {
     struct addrinfo host;
     struct addrinfo *connection;
+    int status;
+
     memset(&host, 0 , sizeof host);
     host.ai_family = AF_INET;
     host.ai_socktype = SOCK_STREAM;
     host.ai_protocol = 0;
     host.ai_flags = AI_PASSIVE;
 
-    int status = getaddrinfo(NULL, "8080", &host, &connection);
-    printf("created a conn with status: %d \n", status);
+    printf("start the connection process \n");
 
-    int sock_conn = socket(connection->ai_family, connection->ai_socktype, connection->ai_protocol);
-    printf("created a socket with status: %d \n", sock_conn);
-    //printf("addr info %s", connection->ai_addr->sa_data);
-
-    bind(sock_conn, connection->ai_addr, connection->ai_addrlen);
-
-    //connect(sock_conn, connection->ai_addr, connection->ai_addrlen);
-    listen(sock_conn, 0);
-
-
-    while(1) {
-        int client_conn = accept(sock_conn, 0, 0);
-
-        char buffer[256] = {0};
-        recv(client_conn, buffer, 256, 0);
-        char *message = buffer + 5;
-        *strchr(message, ' ') = 0;
-        printf("message received\n");
-
-        printf("message receiver: %s\n", message);
-
-        send(client_conn, "Hello back\n", 256, 0);
-        close(client_conn);
+    if (status = getaddrinfo(NULL, "8080", &host, &connection) != 0) {
+        printf("something went wrong");
     }
 
-    freeaddrinfo(connection);
+    printf("create addrinfo %d \n", connection->ai_addrlen);
+
+    int sock = socket(connection->ai_family, connection->ai_socktype, connection->ai_protocol);
+    printf("created a socket %d \n", sock);
+    if (status = bind(sock, connection->ai_addr, connection->ai_addrlen) != 0) {
+        printf("something went wrong\n");
+    }
+    printf("socket binded successfully\n");
+
+    listen(sock, 5);
+    printf("listen to sock %d\n", sock);
+
+    struct sockaddr_in incomingSock;
+    memset(&incomingSock, 0, sizeof(incomingSock));
+    int addrSize = sizeof(incomingSock);
+    int newFd = accept(sock, &incomingSock, &addrSize);
+    printf("new connection accepted\n");
 }
 
