@@ -14,10 +14,11 @@ int main(int argc, char *argv[]) {
     host.ai_flags = AI_PASSIVE;
 
     int status = getaddrinfo(NULL, "8080", &host, &connection);
-    printf("created a connection with status: %d \n", status);
+    printf("created a conn with status: %d \n", status);
 
     int sock_conn = socket(connection->ai_family, connection->ai_socktype, connection->ai_protocol);
     printf("created a socket with status: %d \n", sock_conn);
+    //printf("addr info %s", connection->ai_addr->sa_data);
 
     bind(sock_conn, connection->ai_addr, connection->ai_addrlen);
 

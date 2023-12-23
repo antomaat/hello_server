@@ -29,6 +29,8 @@ void server_calls() {
     printf("socket: %d\n", sock);
     //int bin = bind(sock, servinfo->ai_addr, servinfo->ai_addrlen);
     //printf("bind: %d\n", bin);
+    //printf("ai_addr family: %s", servinfo->ai_addr->sa_family);
+    printf("ai_addr family: %s", servinfo->ai_addr->sa_data);
 
     if (status = (connect(sock, servinfo->ai_addr, servinfo->ai_addrlen)) != 0) {
         fprintf(stderr, "getaddrinfo error: %s\n", gai_strerror(status));
