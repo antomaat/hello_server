@@ -40,5 +40,14 @@ int main(int argc, char *argv[]) {
     int addrSize = sizeof(incomingSock);
     int newFd = accept(sock, &incomingSock, &addrSize);
     printf("new connection accepted\n");
+
+    char results[750];
+    recv(newFd, &results, 750, 0);
+
+    printf("result %s \n", results);
+
+    send(newFd, "result sent", 11, 0);
+    close(newFd);
+
 }
 
